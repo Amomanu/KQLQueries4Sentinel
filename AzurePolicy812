@@ -1,0 +1,16 @@
+
+AzureActivity | where CategoryValue == 'Policy'
+| extend p=todynamic(Properties) 
+| extend policies=todynamic(tostring(p.policies)) 
+| mv-expand policy = policies 
+| mv-expand pol=['policies']
+| where pol.policyDefinitionEffect == "DeployIfNotExists"
+| mv-expand fin=split(pol.policyAssignmentScope , "/")
+| where (fin !contains "subscriptions" and fin != "")
+| project split(fin , "/"),pol.policyAssignmentId
+
+
+
+
+
+# Will report back policies (DeployIfNotExist) that are not compliant on subscriptions , and affected subscription.
